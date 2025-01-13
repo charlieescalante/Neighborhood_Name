@@ -1,29 +1,25 @@
 import streamlit as st
-import requests
+from geopy.geocoders import Nominatim
 
-# App Title
-st.title("Neighborhood Finder")
+# Fetch user agent from Streamlit secrets
+user_agent = st.secrets["USER_AGENT"]
+geolocator = Nominatim(user_agent=user_agent)
 
-# Input Section
-latitude = st.text_input("Enter Latitude:")
-longitude = st.text_input("Enter Longitude:")
+# Title of the app
+st.title("Reverse Geocoding App")
 
-# Button to Get Neighborhood
-if st.button("Get Neighborhood"):
-    if latitude and longitude:
-        try:
-            # Reverse Geocoding API Call (Nominatim)
-            url = f"https://nominatim.openstreetmap.org/reverse?lat={latitude}&lon={longitude}&format=json"
-            response = requests.get(url)
-            data = response.json()
+# User input for latitude and longitude
+latitude = st.text_input("Enter Latitude:", "31.2158271")
+longitude = st.text_input("Enter Longitude:", "-85.3634326")
 
-            # Extract Neighborhood
-            if "address" in data and "neighbourhood" in data["address"]:
-                neighborhood = data["address"]["neighbourhood"]
-                st.success(f"Neighborhood: {neighborhood}")
-            else:
-                st.warning("No neighborhood data found for these coordinates.")
-        except Exception as e:
-            st.error(f"Error: {e}")
-    else:
-        st.error("Please enter both latitude and longitude.")
+# Button to trigger reverse geocoding
+if st.button("Get Address"):
+    try:
+        # Perform reverse geocoding
+        location = geolocator.reverse(f"{latitude},{longitude}")
+        if location:
+            st.success(f"Address: {location.raw['display_name']}")
+        else:
+            st.error("No address found for the given coordinates.")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
