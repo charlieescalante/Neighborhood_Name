@@ -1,3 +1,2 @@
 streamlit
-reverse_geocoder
-numpy
+geopy
